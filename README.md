@@ -16,3 +16,7 @@ This project integrates ServiceNow and Ansible Tower to automate incident manage
 1. **ServiceNow Business Rule**: Triggers an Ansible Tower job on high-priority incidents.
 2. **Ansible Tower Job**: Runs a Python script to process the incident.
 3. **Python Script**: Fetches work notes from ServiceNow, generates a summary using OpenAI, and updates the incident summary.
+
+
+## Running the Playbook
+1. **Whenever the business rule is triggered in ServiceNow, it will make a POST request to the Ansible Tower webhook, launching the job that runs the playbook. The playbook, in turn, runs the Python script to update the incident summary.
