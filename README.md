@@ -19,4 +19,4 @@ This project integrates ServiceNow and Ansible Tower to automate incident manage
 
 
 ## Running the Playbook
-1. **Whenever the business rule is triggered in ServiceNow, it will make a POST request to the Ansible Tower webhook, launching the job that runs the playbook. The playbook, in turn, runs the Python script to update the incident summary.
+1. **Whenever the business rule is triggered in ServiceNow, it will make a POST request to the Ansible Tower webhook, launching the job that runs the playbook. The playbook, in turn, runs the Python script to update the incident summary**.
