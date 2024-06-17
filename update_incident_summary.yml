@@ -1,0 +1,6 @@
+---
+- name: Update ServiceNow Incident Summary
+  hosts: localhost
+  tasks:
+    - name: Run Python script to update ServiceNow incident
+      command: python3 /path/to/update_incident_summary.py "{{ incident_id }}" "{{ work_notes }}"
