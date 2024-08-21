@@ -1,45 +1,58 @@
-import sys
+'''
+1. Create a FastAPI application that exposes a webhook endpoint to receive notifications from ServiceNow.
+2. When a high-priority incident is created or updated in ServiceNow, the business rule sends a POST request to the FastAPI webhook endpoint.
+3. The FastAPI application receives the request and triggers a Python function to process the incident.
+4. The Python function fetches work notes from ServiceNow using the ServiceNow API.
+5. The function generates a summary using OpenAI's API.
+6. The function updates the incident summary in ServiceNow using the ServiceNow API.
+'''
+from fastapi import FastAPI, Request
 import requests
-from requests.auth import HTTPBasicAuth
-import openai
+from openai import OpenAI
 
-# ServiceNow credentials and instance details
-SN_INSTANCE = 'your_instance'
-SN_USERNAME = 'your_username'
-SN_PASSWORD = 'your_password'
-OPENAI_API_KEY = 'your_openai_api_key'
+app = FastAPI()
 
-# Set OpenAI API key
-openai.api_key = OPENAI_API_KEY
+# ServiceNow credentials
+sn_instance = "your_sn_instance"
+sn_username = "your_sn_username"
+sn_password = "your_sn_password"
 
-def generate_summary(work_notes):
-    prompt = f"Summarize the following work notes:\n{work_notes}"
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=150
-    )
-    summary = response.choices[0].text.strip()
-    return summary
+# OpenAI API key
+openai_api_key = "your_openai_api_key"
 
-def update_incident_summary(incident_id, summary):
-    url = f'https://{SN_INSTANCE}.service-now.com/api/now/table/incident/{incident_id}'
-    headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    data = {"short_description": summary}
-    response = requests.patch(url, auth=HTTPBasicAuth(SN_USERNAME, SN_PASSWORD), headers=headers, json=data)
-    return response.json()
+# ServiceNow business rule webhook endpoint
+@app.post("/sn-webhook")
+async def sn_webhook(request: Request):
+    # Get incident details from ServiceNow
+    incident_id = request.json()["incident_id"]
+    sn_url = f"https://{sn_instance}.service-now.com/api/now/table/incident/{incident_id}"
+    sn_headers = {
+        "Authorization": f"Basic {sn_username}:{sn_password}",
+        "Content-Type": "application/json"
+    }
+    sn_response = requests.get(sn_url, headers=sn_headers)
+    incident_data = sn_response.json()
 
-def main():
-    if len(sys.argv) != 3:
-        print("Usage: python update_incident_summary.py <incident_id> <work_notes>")
-        sys.exit(1)
+    # Fetch work notes from ServiceNow
+    work_notes_url = f"https://{sn_instance}.service-now.com/api/now/table/incident_work_note?sysparm_query=incident={incident_id}"
+    work_notes_response = requests.get(work_notes_url, headers=sn_headers)
+    work_notes_data = work_notes_response.json()
 
-    incident_id = sys.argv[1]
-    work_notes = sys.argv[2]
+    # Generate summary using OpenAI
+    openai = OpenAI(api_key=openai_api_key)
+    summary = openai.Completion.create(
+        prompt="Generate a summary of the incident",
+        temperature=0.7,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=["\n"]
+    ).choices[0].text
 
-    summary = generate_summary(work_notes)
-    update_response = update_incident_summary(incident_id, summary)
-    print(f"Updated Incident {incident_id} with summary: {summary}")
+    # Update incident summary in ServiceNow
+    update_url = f"https://{sn_instance}.service-now.com/api/now/table/incident/{incident_id}"
+    update_data = {"summary": summary}
+    update_response = requests.patch(update_url, headers=sn_headers, json=update_data)
 
-if __name__ == "__main__":
-    main()
+    return {"message": "Incident summary updated successfully"}
