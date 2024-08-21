@@ -1,7 +1,7 @@
 
-*Project:* Automated Incident Management Integration between ServiceNow and FastAPI
+## Project: Automated Incident Management Integration between ServiceNow and FastAPI
 
-*Overview:*
+## Overview:
 
 This project integrates ServiceNow with a FastAPI application to automate incident management. When a high-priority incident is created or updated in ServiceNow, a business rule triggers a FastAPI endpoint. The endpoint runs a Python script that:
 
@@ -9,14 +9,14 @@ This project integrates ServiceNow with a FastAPI application to automate incide
 2. Generates a summary using OpenAI
 3. Updates the incident summary in ServiceNow
 
-*Components:*
+## Components:
 
 1. ServiceNow: Incident management platform
 2. FastAPI: Web framework for building APIs
 3. Python: Scripting language for automation
 4. OpenAI: AI platform for generating summaries
 
-*Workflow:*
+## Workflow:
 
 1. High-priority incident created or updated in ServiceNow
 2. Business rule triggers FastAPI endpoint
@@ -25,7 +25,7 @@ This project integrates ServiceNow with a FastAPI application to automate incide
 5. Python script generates summary using OpenAI
 6. Python script updates incident summary in ServiceNow
 
-*Benefits:*
+## Benefits:
 
 1. Automated incident summarization
 2. Enhanced incident management efficiency
